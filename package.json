@@ -1,0 +1,14 @@
+{
+  "name": "slack-oauth-onboarding",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-serve Slack user-token issuance for Claude Code + LiteLLM",
+  "main": "server.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
