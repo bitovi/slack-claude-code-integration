@@ -26,7 +26,6 @@ workloads:
       tag: 25673ae84c34ac952c6a3254bcdb8a7a0314e65c
     env:
       NODE_ENV: production
-      PORT: "3000"
       # Must exactly match a Redirect URL registered on the Slack app.
       SLACK_OAUTH_REDIRECT_URL: https://slack-mcp.bitovi-tools.com/oauth/callback
       # Requested user scopes. Must be a subset of the app's User Token Scopes.
