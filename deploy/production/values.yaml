@@ -23,7 +23,7 @@ workloads:
     # The running release. CI rewrites this on every promotion; it must never
     # be empty — the Composition renders no Deployment without a tag.
     image:
-      tag: 25673ae84c34ac952c6a3254bcdb8a7a0314e65c
+      tag: 0be3d985064ff29078f1f015ff708340b35ba2fd
     env:
       NODE_ENV: production
       # Must exactly match a Redirect URL registered on the Slack app.
