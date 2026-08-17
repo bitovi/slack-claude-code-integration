@@ -12,7 +12,7 @@
 # Issues Slack user tokens to Bitovi staff so Claude Code can reach Slack's
 # hosted MCP server (mcp.slack.com) as the individual user. Stateless: tokens
 # are rendered once in the browser and never persisted.
-name: slack-claude-code-integration
+name: slack-oauth-onboarding
 repo: bitovi/slack-claude-code-integration
 workloads:
   main:
