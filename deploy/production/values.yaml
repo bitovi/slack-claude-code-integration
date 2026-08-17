@@ -23,7 +23,7 @@ workloads:
     # The running release. CI rewrites this on every promotion; it must never
     # be empty — the Composition renders no Deployment without a tag.
     image:
-      tag: v0.0.1
+      tag: 25673ae84c34ac952c6a3254bcdb8a7a0314e65c
     env:
       NODE_ENV: production
       PORT: "3000"
