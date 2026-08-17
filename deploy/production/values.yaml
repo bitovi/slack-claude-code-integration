@@ -1,4 +1,91 @@
-# slack-oauth-onboarding — PRODUCTION.
+
+Claude finished the response
+what are the contents of gitops/apps/slack-claude-code-integration.yaml then?
+
+
+Thought for 17s
+Thought for 17s
+I'm inferring this rather than knowing it — I've never seen one of these files. The reliable move is asking for the rating-candidates equivalent and copying it. But here's a reasoned starting point, based on what the error message and the values file header reveal.
+
+The error says the Argo CD Application creates the ECR repo and push role, and your values file lives in your repo while the chart lives in the platform repo. That means a multi-source Application:
+
+yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: slack-claude-code-integration
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "40"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  sources:
+    - repoURL: https://github.com/bitovi/bitovi-platform-services.git
+      targetRevision: main
+      path: charts/interface          # ← unsure; header references charts/interface.yaml
+      helm:
+        valueFiles:
+          - $values/deploy/production/values.yaml
+    - repoURL: https://github.com/bitovi/slack-claude-code-integration.git
+      targetRevision: main
+      ref: values                      # contributes no manifests, just the values file
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: slack-claude-code-integration
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+What I'm genuinely unsure about: the chart path, the namespace convention, and whether project: platform is right for app workloads. All three are things an existing example settles instantly.
+
+One real inconsistency worth resolving first. CI expected the role slack-claude-code-integration-github-ecr-push — derived from your repo name. But your values.yaml says name: slack-oauth-onboarding. Those disagree, and if the platform derives resource names from name: while CI derives them from the repo, they'll never meet.
+
+Simplest fix is to set name: slack-claude-code-integration in the values file so everything matches the repo. Worth confirming with them which field governs, since rating-candidates has name: rating-candidates with repo: bitovi/RatingCandidates — so they don't have to match exactly, but the derivation rule matters.
+
+
+Message collapsed
+
+Thought for 10s
+Thought for 10s
+My inference was close but the source order and path were off. More importantly, this reveals a naming constraint you need to fix.
+
+Look at the pairing: repo bitovi/RatingCandidates → name: rating-candidates → namespace rating-candidates. Your CI expected the role slack-claude-code-integration-github-ecr-push, which is the kebab-cased repo name. The platform creates that role from name: in your values file. So name: must equal the kebab-cased repo name, and yours currently says slack-oauth-onboarding — they'd never meet.
+
+
+Ran a command, read a file
+Ran a command, read a file
+Two files. The gitops one goes to gitops/apps/slack-claude-code-integration.yaml in bitovi-platform-services — a PR into their repo, not yours.
+
+I also changed name: in your values file from slack-oauth-onboarding to slack-claude-code-integration, so it lines up with the repo, the namespace, the Argo Application, and the role name CI is looking for. Commit that alongside.
+
+Differences from my earlier guess, for the record: the values source comes first and the chart second, the path is charts/interface, and there's a releaseName. Good thing you got the real example.
+
+Two things I inferred that they should confirm:
+
+The naming derivation. RatingCandidates → rating-candidates implies the platform kebab-cases the repo name, and CI's expected role matched that pattern for you. I'm fairly confident, but they'll know for sure — and it's the kind of thing that fails confusingly if wrong.
+
+Whether a single-environment app is fine. Their comment says production owns the shared tier "that staging reuses," so production standing alone should work. But every existing app may have both, and yours would be the first without.
+
+I kept the Slack notification annotation. Their own comment argues against enabling it broadly, and an internal tool deploying a few times a year is arguably not worth a channel message — drop that line if you agree.
+
+
+Gitops slack claude code integration
+YAML 
+
+Values
+YAML 
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Values · YAML
+# slack-claude-code-integration — PRODUCTION.
 #
 # The platform app interface: one file describing the whole app (spec:
 # bitovi-platform-services/charts/interface.yaml). Its staging counterpart is
@@ -12,27 +99,36 @@
 # Issues Slack user tokens to Bitovi staff so Claude Code can reach Slack's
 # hosted MCP server (mcp.slack.com) as the individual user. Stateless: tokens
 # are rendered once in the browser and never persisted.
-name: slack-oauth-onboarding
+name: slack-claude-code-integration
 repo: bitovi/slack-claude-code-integration
 workloads:
   main:
     kind: server
     port: 3000
     health: /health
-    domain: slack-setup.bitovi-tools.com
+    domain: slack-mcp.bitovi-tools.com
     # The running release. CI rewrites this on every promotion; it must never
     # be empty — the Composition renders no Deployment without a tag.
     image:
       tag: v0.0.1
     env:
       NODE_ENV: production
-      PORT: "3000"
+      PORT: '3000'
       # Must exactly match a Redirect URL registered on the Slack app.
-      SLACK_OAUTH_REDIRECT_URL: "https://slack-mcp.bitovi-tools.com/oauth/callback"
+      SLACK_OAUTH_REDIRECT_URL: https://slack-mcp.bitovi-tools.com/oauth/callback
       # Requested user scopes. Must be a subset of the app's User Token Scopes.
-      SLACK_USER_SCOPES: "channels:history,channels:read,chat:write,groups:history,groups:read,im:history,im:read,im:write,mpim:history,mpim:read,reactions:read,search:read,usergroups:read,users.profile:read,users:read"
+      SLACK_USER_SCOPES: channels:history,channels:read,chat:write,groups:history,groups:read,im:history,im:read,im:write,mpim:history,mpim:read,reactions:read,search:read,usergroups:read,users.profile:read,users:read
     # Field names in this item must match the env vars the app reads:
-    # SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, SLACK_STATE_SECRET.
-    secrets: op://bitovi-platform/claude-usage-proxy-secrets
+    # SLACK_OAUTH_CLIENT_ID, SLACK_OAUTH_CLIENT_SECRET, SLACK_OAUTH_STATE_SECRET.
+    secrets: op://bitovi-platform/slack-oauth-onboarding-secrets
 infra:
   hostedZone: bitovi-tools-com
+ 
+
+
+
+
+
+
+
+
