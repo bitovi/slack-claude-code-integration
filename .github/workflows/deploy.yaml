@@ -45,9 +45,9 @@ jobs:
       # something — without needing a full test suite.
       - name: Smoke test
         env:
-          SLACK_CLIENT_ID: test.id
-          SLACK_CLIENT_SECRET: test-secret
-          SLACK_STATE_SECRET: test-state-secret
+          SLACK_OAUTH_CLIENT_ID: test.id
+          SLACK_OAUTH_CLIENT_SECRET: test-secret
+          SLACK_OAUTH_STATE_SECRET: test-state-secret
           SLACK_OAUTH_REDIRECT_URL: https://example.test/oauth/callback
           SLACK_USER_SCOPES: chat:write
         run: |
