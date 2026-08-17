@@ -1,0 +1,38 @@
+# slack-oauth-onboarding — PRODUCTION.
+#
+# The platform app interface: one file describing the whole app (spec:
+# bitovi-platform-services/charts/interface.yaml). Its staging counterpart is
+# deploy/staging/values.yaml — two complete files rather than a base plus an
+# overlay. Shared fields live in both places; keep them in step.
+#
+# Absence of `env:` at the top level marks this as production: it owns the
+# shared tier (the ECR repository, the CI push role, the ESO secret push-back)
+# that staging reuses.
+#
+# Issues Slack user tokens to Bitovi staff so Claude Code can reach Slack's
+# hosted MCP server (mcp.slack.com) as the individual user. Stateless: tokens
+# are rendered once in the browser and never persisted.
+name: slack-oauth-onboarding
+repo: bitovi/slack-claude-code-integration
+workloads:
+  main:
+    kind: server
+    port: 3000
+    health: /health
+    domain: slack-setup.bitovi-tools.com
+    # The running release. CI rewrites this on every promotion; it must never
+    # be empty — the Composition renders no Deployment without a tag.
+    image:
+      tag: v0.0.1
+    env:
+      NODE_ENV: production
+      PORT: "3000"
+      # Must exactly match a Redirect URL registered on the Slack app.
+      SLACK_OAUTH_REDIRECT_URL: "https://slack-mcp.bitovi-tools.com/oauth/callback"
+      # Requested user scopes. Must be a subset of the app's User Token Scopes.
+      SLACK_USER_SCOPES: "channels:history,channels:read,chat:write,groups:history,groups:read,im:history,im:read,im:write,mpim:history,mpim:read,reactions:read,search:read,usergroups:read,users.profile:read,users:read"
+    # Field names in this item must match the env vars the app reads:
+    # SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, SLACK_STATE_SECRET.
+    secrets: op://bitovi-platform/claude-usage-proxy-secrets
+infra:
+  hostedZone: bitovi-tools-com

@@ -19,14 +19,14 @@ The token is rendered once and never persisted. There is no database.
 
 ## Environment
 
-| Variable | Source | Notes |
-|---|---|---|
-| `SLACK_CLIENT_ID` | 1Password → `SLACK_OAUTH_CLIENT_ID` | |
-| `SLACK_CLIENT_SECRET` | 1Password → `SLACK_OAUTH_CLIENT_SECRET` | never logged |
-| `SLACK_STATE_SECRET` | 1Password → `SLACK_OAUTH_STATE_SECRET` | random 32+ bytes; **add this field before first deploy** |
-| `SLACK_OAUTH_REDIRECT_URL` | manifest | must exactly match the Redirect URL in the Slack app |
-| `SLACK_USER_SCOPES` | manifest | comma-separated, no spaces; subset of the app's User Token Scopes |
-| `PORT` | manifest | defaults to 3000 |
+| Variable                    | Source                                  | Notes                                                             |
+| --------------------------- | --------------------------------------- | ----------------------------------------------------------------- |
+| `SLACK_OAUTH_CLIENT_ID`     | 1Password → `SLACK_OAUTH_CLIENT_ID`     |                                                                   |
+| `SLACK_OAUTH_CLIENT_SECRET` | 1Password → `SLACK_OAUTH_CLIENT_SECRET` | never logged                                                      |
+| `SLACK_OAUTH_STATE_SECRET`  | 1Password → `SLACK_OAUTH_STATE_SECRET`  | random 32+ bytes; **add this field before first deploy**          |
+| `SLACK_OAUTH_REDIRECT_URL`  | manifest                                | must exactly match the Redirect URL in the Slack app              |
+| `SLACK_USER_SCOPES`         | manifest                                | comma-separated, no spaces; subset of the app's User Token Scopes |
+| `PORT`                      | manifest                                | defaults to 3000                                                  |
 
 The process exits at startup if any of these are missing.
 
@@ -49,9 +49,9 @@ Changing scopes invalidates existing tokens; users re-run the flow.
 
 ```bash
 npm install
-SLACK_CLIENT_ID=… \
-SLACK_CLIENT_SECRET=… \
-SLACK_STATE_SECRET=$(openssl rand -hex 32) \
+SLACK_OAUTH_CLIENT_ID=… \
+SLACK_OAUTH_CLIENT_SECRET=… \
+SLACK_OAUTH_STATE_SECRET=$(openssl rand -hex 32) \
 SLACK_OAUTH_REDIRECT_URL=https://localhost:3000/oauth/callback \
 SLACK_USER_SCOPES=chat:write,channels:read \
 npm start
