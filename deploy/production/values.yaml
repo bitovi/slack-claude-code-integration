@@ -32,6 +32,6 @@ workloads:
       SLACK_USER_SCOPES: channels:history,channels:read,chat:write,groups:history,groups:read,im:history,im:read,im:write,mpim:history,mpim:read,reactions:read,search:read,usergroups:read,users.profile:read,users:read
     # Field names in this item must match the env vars the app reads:
     # SLACK_OAUTH_CLIENT_ID, SLACK_OAUTH_CLIENT_SECRET, SLACK_OAUTH_STATE_SECRET.
-    secrets: op://bitovi-platform/slack-oauth-onboarding-secrets
+    secrets: op://bitovi-platform/claude-usage-proxy-secrets
 infra:
   hostedZone: bitovi-tools-com
